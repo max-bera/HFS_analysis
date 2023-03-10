@@ -1,0 +1,32 @@
+function [intensity_over_time] = HFS_struct_load(filename,resampling_freq,padding)
+%HFS struct load takes the path of a .tdms file obtained via HFS, the
+%required resampling and the pading. It resamples the raw spectrometer data
+%linearly in k-space, and outputs the intensity over time 
+
+    %import  TDMS
+    dsens_struct = TDMS_getStruct(filename);
+    %extract sampling freq
+    acq_freq = str2double(dsens_struct.Raw_data.Data.Props.Effective_F_Sps);
+    %calculate time interval [ms]
+    time_ms = length(dsens_struct.Raw_data.Time.data);
+    %define length of experiment
+    N = length(dsens_struct.Raw_data.LambdaArray.data);
+    acq_interval = round(acq_freq/resampling_freq);
+    %rewrite raw data in matrix form 
+    raw_TD = reshape(dsens_struct.Raw_data.Data.data,...
+            [N time_ms]);
+    %remove background
+    raw_TDA = double(raw_TD);
+    %downsample according to user input
+    ds_pointer = 1:acq_interval:time_ms;
+    raw_TDA_ds = raw_TDA(:,ds_pointer);
+    %resample linearly in k space
+    n_lambda_sweep = length(dsens_struct.Raw_data.LambdaArray.data);
+    k_space = 2*pi./dsens_struct.Raw_data.LambdaArray.data;
+    [raw_RESA, ~] = k_resample_M(raw_TDA_ds,k_space);
+    %calculate transform
+    FTAdata = fft(raw_RESA,n_lambda_sweep*padding)';
+    real_data = abs(FTAdata);
+    intensity_over_time = real_data(1:length(real_data),1:256)';
+end
+
