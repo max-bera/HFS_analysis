@@ -25,13 +25,15 @@ for i=1:length(unique_osc)
 end
 
 
-
+no_model_plot = false;
 if strcmp('2PL',rheomodel)
     fun = @(x)x(1).*(1i*unique_osc).^x(2)+x(3).*(1i*unique_osc).^x(4);
 elseif strcmp('PT',rheomodel)
     fun = @(x)(x(5)*(1i.*unique_osc).^x(6).*(x(1)*(1i.*unique_osc).^x(2)+...
     x(3)*(1i.*unique_osc).^x(4)))./(x(5)*(1i.*unique_osc).^x(6)+...
     x(1)*(1i.*unique_osc).^x(2)+x(3)*(1i.*unique_osc).^x(4));
+else
+    no_model_plot = true;
 end
 
 figure(1)
@@ -45,7 +47,10 @@ grid on
 xlabel('frequency [Hz]')
 ylabel('E^* [Pa]')
 
-loglog(unique_osc,real(fun(fit_params)+Ecomp_mean),'g-');
-loglog(unique_osc,imag(fun(fit_params)+Ecomp_mean),'r--');
+if no_model_plot == false
+    loglog(unique_osc,real(fun(fit_params)+Ecomp_mean),'g-');
+    loglog(unique_osc,imag(fun(fit_params)+Ecomp_mean),'r--');
+end
+
 end
 

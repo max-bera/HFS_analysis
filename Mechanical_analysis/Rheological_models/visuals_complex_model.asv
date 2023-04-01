@@ -25,12 +25,15 @@ for i=1:length(unique_osc)
 end
 
 
+no_model_plot = False;
 if strcmp('2PL',rheomodel)
     fun = @(x)x(1).*(1i*unique_osc).^x(2)+x(3).*(1i*unique_osc).^x(4);
 elseif strcmp('PT',rheomodel)
     fun = @(x)(x(5)*(1i.*unique_osc).^x(6).*(x(1)*(1i.*unique_osc).^x(2)+...
     x(3)*(1i.*unique_osc).^x(4)))./(x(5)*(1i.*unique_osc).^x(6)+...
-    x(1)*(1i.*unique_osc).^x(2)+x(3)*(1i.*oscfreq).^x(4));
+    x(1)*(1i.*unique_osc).^x(2)+x(3)*(1i.*unique_osc).^x(4));
+    
+end
 
 figure(1)
 errorbar(unique_osc,real(Ecomp_mean),real(Ecomp_SE),real(Ecomp_SE),'ok')
@@ -41,7 +44,8 @@ ax.YScale = 'log';
 ax.XScale = 'log';
 grid on
 xlabel('frequency [Hz]')
-ylabel('E^* [kPa]')
+ylabel('E^* [Pa]')
+
 loglog(unique_osc,real(fun(fit_params)+Ecomp_mean),'g-');
 loglog(unique_osc,imag(fun(fit_params)+Ecomp_mean),'r--');
 end
