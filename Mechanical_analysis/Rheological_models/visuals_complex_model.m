@@ -28,6 +28,7 @@ end
 no_model_plot = false;
 if strcmp('2PL',rheomodel)
     fun = @(x)x(1).*(1i*unique_osc).^x(2)+x(3).*(1i*unique_osc).^x(4);
+    %fun = @(x)x(1).*cos(pi/2*x(2)).*(unique_osc).^x(2)+x(3).*cos(pi/2*x(3)).*(unique_osc).^x(4)+1i*(x(1).*sin(pi/2*x(2)).*(unique_osc).^x(2)+x(3).*sin(pi/2*x(3)).*(unique_osc).^x(4));
 elseif strcmp('PT',rheomodel)
     fun = @(x)(x(5)*(1i.*unique_osc).^x(6).*(x(1)*(1i.*unique_osc).^x(2)+...
     x(3)*(1i.*unique_osc).^x(4)))./(x(5)*(1i.*unique_osc).^x(6)+...
@@ -48,8 +49,9 @@ xlabel('frequency [Hz]')
 ylabel('E^* [Pa]')
 
 if no_model_plot == false
-    loglog(unique_osc,real(fun(fit_params)+Ecomp_mean),'g-');
-    loglog(unique_osc,imag(fun(fit_params)+Ecomp_mean),'r--');
+    
+    loglog(unique_osc,real(fun(fit_params)),'g-');
+    loglog(unique_osc,imag(fun(fit_params)),'r--');
 end
 
 end
