@@ -1,0 +1,74 @@
+%% import experimental data (formatted as SLINE TIME #MEAS FREQ ES EL)
+
+path = '/Volumes/T7/PhD/EXPERIMENTAL DATA/SPHEROIDS/Aging/Analysis/Mechanical analysis/DMA_HFS_HCV3.csv'
+%select line to model
+s_line = 'T24';
+%select timepoint to model
+s_time = '3';
+
+DATA_M = readtable(path);
+
+%% filter by line and day
+
+DATA_M.line = categorical(DATA_M.line)
+idx_line = DATA_M.line == s_line;
+data_oneline = DATA_M(idx_line,:);
+
+data_oneline.day = categorical(data_oneline.day);
+idx_day = data_oneline.day == s_time;
+data_DMA = data_oneline(idx_day,:);
+
+%extract number of indipendent samples measured
+n_ind_samples = length(unique(data_DMA.measure));
+
+%% clean data and model
+
+%
+%remove failed measurements
+fail_idx = isnan(data_DMA(:,5)) | isnan(data_DMA(:,6));
+rheo_data = data_DMA(~fail_idx,4:6);
+rheo_freq = rheo_data(:,1);
+rheo_compl = rheo_data(:,2) + 1i * rheo_data(:,3);
+
+
+%do the fitting. 2PL require 4 pars, PT 6
+x0 = [1000 0.1 10 1 10000 1 1];
+lb = [0 0.1 0 0 0 1 0];
+ub = [1e6 1 1e6 1 1e6 1 1e6];
+
+options = optimoptions(@lsqnonlin,'Display','off','MaxFunctionEvaluations',1e4,'MaxIteration',1e3,'FunctionTolerance',1e-8,'StepTolerance',5e-8);
+[model_val,resnorm,al,exitflag] = lsqnonlin(@(x) fractional_poynting_thompson_objfun(x,rheo_freq,rheo_compl),x0,lb,ub,options)     
+model_val(1),model_val(2),model_val(3),model_val(4)
+
+%show me what's up
+figure
+visuals_complex_model('PT','SE',rheo_freq,rheo_data(:,2),rheo_data(:,3),model_val,3);
+
+
+%%
+
+
+
+%oscillation values
+unique_osc = unique(OscillationFrequencyHz);
+%mean complex modulus
+Ecomp_mean = zeros(length(unique_osc),1);
+j=1;
+for i = 1 : length(unique_osc)
+    osc_idx = OscillationFrequencyHz == unique_osc(i);
+    Ecomp_mean(i) = mean(StorageModulusEPa(osc_idx))/1000 + 1i * mean(LossModulusEPa(osc_idx))/1000;
+end
+
+
+x0 = [0 0.1 1 1];
+lb = [0 0 0 0];
+ub = [1e6 1 1e6 1];
+
+options = optimoptions(@lsqnonlin,'Display','off','MaxFunctionEvaluations',1e4,'MaxIteration',1e3,'FunctionTolerance',1e-18,'StepTolerance',5e-16);
+
+%[model_val] = lsqnonlin(@(x0) double_power_law_objfun(x0,OscillationFrequencyHz,StorageModulusEPa+1i*LossModulusEPa),x0,lb,ub,options);
+
+[model_val,resnorm,al,exitflag] = lsqnonlin(@(params) double_power_law_objfun(params,unique_osc,Ecomp_mean),x0,lb,ub,options)     
+model_val(1),model_val(2),model_val(3),model_val(4)
+
+visuals_complex_model('2PL','SE',OscillationFrequencyHz,StorageModulusEPa/1000,LossModulusEPa/1000,model_val,14);
