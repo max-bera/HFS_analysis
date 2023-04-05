@@ -1,4 +1,4 @@
-function F = fractional_poynting_thompson_objfun(params, oscfreq,Ecomp)
+function F = fractional_poynting_thompson_objfun(x, oscfreq,Ecomp)
 %fractional_poynting_thompson.m fits E* vs frequency with a lumped parameter model
 %equivalent to two parallel springpots + a thid spring pot in series.
 %
@@ -9,15 +9,15 @@ function F = fractional_poynting_thompson_objfun(params, oscfreq,Ecomp)
 %OUTPUT
 %fit function
 %%
-storagemod = real((params(5)*(1i.*oscfreq).^params(6).*(params(1)*(1i.*oscfreq).^params(2)+...
-    params(3)*(1i.*oscfreq).^params(4)))./(params(5)*(1i.*oscfreq).^params(6)+...
-    params(1)*(1i.*oscfreq).^params(2)+params(3)*(1i.*oscfreq).^params(4))-Ecomp);
+storagemod = real((x(5)*(1i.*oscfreq).^x(6).*(x(1)*(1i.*oscfreq).^x(2)+...
+    x(3)*(1i.*oscfreq).^x(4)))./(x(5)*(1i.*oscfreq).^x(6)+...
+    x(1)*(1i.*oscfreq).^x(2)+x(3)*(1i.*oscfreq).^x(4))-Ecomp);
 
-lossmod = imag((params(5)*(1i.*oscfreq).^params(6).*(params(1)*(1i.*oscfreq).^params(2)+...
-    params(3)*(1i.*oscfreq).^params(4)))./(params(5)*(1i.*oscfreq).^params(6)+...
-    params(1)*(1i.*oscfreq).^params(2)+params(3)*(1i.*oscfreq).^params(4))-Ecomp);
+lossmod = imag((x(5)*(1i.*oscfreq).^x(6).*(x(1)*(1i.*oscfreq).^x(2)+...
+    x(3)*(1i.*oscfreq).^x(4)))./(x(5)*(1i.*oscfreq).^x(6)+...
+    x(1)*(1i.*oscfreq).^x(2)+x(3)*(1i.*oscfreq).^x(4))-Ecomp);
  
-F=[storagemod,lossmod];
+F=[storagemod;lossmod];
  
 end
 
