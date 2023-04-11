@@ -4,6 +4,7 @@ function [Ecomp_mean] = visuals_complex_model(rheomodel,errortype,freq_list,Esto
 %
 %INPUT (* are mandatory)
 %model           *    either 2PL or PT
+%errortype            either STD or SE, defaults to STD
 %freq_list       *
 %E_comp_list     * 
 %fit_params      *
@@ -21,17 +22,21 @@ theor_freq = logspace(-2,3);
 
 for i=1:length(unique_osc)
     idx_list = freq_list == unique_osc(i);
-    Ecomp_mean(i) = mean(Estor_list(idx_list))...
-        + 1i * mean(Eloss_list(idx_list));
+    Ecomp_mean(i) = geomean(Estor_list(idx_list))...
+        + 1i * geomean(Eloss_list(idx_list));
     if strcmp(errortype,'SE')
-    Ecomp_SE(i) = std(Estor_list(idx_list))/sqrt(sum(idx_list))...
-        + 1i * std(Eloss_list(idx_list))/sqrt(sum(idx_list));
+        Ecomp_SE(i) = std(Estor_list(idx_list))/sqrt(length())...
+            + 1i * std(Eloss_list(idx_list))/sqrt(10);
+    else
+        Ecomp_SE(i) = std(Estor_list(idx_list))...
+            + 1i * std(Eloss_list(idx_list));
 end
 
 
 no_model_plot = false;
 if strcmp('2PL',rheomodel)
     fun = @(x)x(1).*(1i*theor_freq).^x(2)+x(3).*(1i*theor_freq).^x(4);
+   % fun = @(x)x(1).*cos(pi/2*x(2)).*(unique_osc).^x(2)+x(3).*cos(pi/2*x(3)).*(unique_osc).^x(4)+1i*(x(1).*sin(pi/2*x(2)).*(unique_osc).^x(2)+x(3).*sin(pi/2*x(3)).*(unique_osc).^x(4));
 elseif strcmp('PT',rheomodel)
     fun = @(x)(x(5)*(1i.*theor_freq).^x(6)...
         .*(x(1)*(1i.*theor_freq).^x(2)+x(3)*(1i.*theor_freq).^x(4)))...
