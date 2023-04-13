@@ -50,13 +50,14 @@ else
     no_model_plot = true;
 end
 
-
+hold off
 errorbar(unique_osc,real(Ecomp_mean),real(Ecomp_SE),real(Ecomp_SE),'ok')
 hold on
 errorbar(unique_osc,imag(Ecomp_mean),imag(Ecomp_SE),imag(Ecomp_SE),'*k')
 ax = gca;
 ax.YScale = 'log';
 ax.XScale = 'log';
+ylim([10e-2 10e2])
 grid on
 xlabel('frequency [Hz]')
 ylabel('E^* [Pa]')
@@ -74,8 +75,12 @@ if no_model_plot == false
 
     loglog(theor_freq,real(fun(fit_params)),...
         'Color',storlinepat,'LineStyle',disp_style);
+
     loglog(theor_freq,imag(fun(fit_params)),...
         'Color',losslinepat,'LineStyle',disp_style);
+
+    xlim([10e-3 10e2])
+    ylim([10e-1 10e1])
 end
 
 end

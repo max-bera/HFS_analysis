@@ -1,12 +1,12 @@
 %% import experimental data (formatted as SLINE TIME #MEAS FREQ ES EL)
 
-path = '/Volumes/T7/PhD/EXPERIMENTAL DATA/SPHEROIDS/Aging/Analysis/Mechanical analysis/DMA_HFS_complete.csv';
-path = '/Users/massimilianoberardi/Desktop/AFM_REFORMATTED.csv'
+path = 'D:\PhD\EXPERIMENTAL DATA\SPHEROIDS\Aging\Analysis\Mechanical analysis\DMA_HFS_complete.csv';
+%path = 'C:\Users\massimiliano.berardi\Downloads\AFM_REFORMATTED.csv'
 
 % select method (the syntax between files is slightly different)
-s_method = 'AFM';
+s_method = 'HFS';
 % select line to model
-s_line = 'HT1376';
+s_line = 'T24';
 % select timepoint to model
 s_time = [3,14];
 
@@ -48,27 +48,27 @@ for j=1:length(s_time)
     lb = [9 .1 0 0.77 0 0];
     ub = [1e6 1 1e6 1 1e6 1];
 
-    x0 = [0.1 0 800 1 .20 0 200 1];
-    lb = [0 0 0 1 0 0 0 1];
-    ub = [1e6 0 1e6 1 1e6 0 1e6 1];
+  %  x0 = [0.1 0 800 1 .20 0 200 1];
+ %   lb = [0 0 0 1 0 0 0 1];
+%    ub = [1e6 0 1e6 1 1e6 0 1e6 1];
 
 
 %      x0 = [17.9 0  .023 1 1 1000];
  %     lb = [0 0 0 1 0 1];
   %    ub = [1e6 1 1e6 1 1e6 1];
-%     x0 = [1 0.1 0.1 .8];
-%     lb = [0 0 0 0];
-%     ub = [1e6 1 1e6 1];
+  %   x0 = [1 0.1 0.1 .8];
+   %  lb = [0 0 0 0];
+    % ub = [1e6 1 1e6 1];
 %     
-    options = optimoptions(@lsqnonlin,'Display','off','MaxFunctionEvaluations',3e4,'MaxIteration',1e3,'FunctionTolerance',1e-16,'StepTolerance',5e-16);
-    [model_val,resnorm,resid,exitflag,~,~,jacobian] = lsqnonlin(@(x) fractional_burgers_objfun(x,rheo_freq,rheo_compl),x0,lb,ub,options);
+    options = optimoptions(@lsqnonlin,'Display','off','MaxFunctionEvaluations',3e4,'MaxIteration',1e3,'FunctionTolerance',1e-18,'StepTolerance',5e-16);
+    [model_val,resnorm,resid,exitflag(j),~,~,jacobian] = lsqnonlin(@(x) fractional_poynting_thompson_objfun(x,rheo_freq,rheo_compl),x0,lb,ub,options);
     
     %calculate confidence bounds
     CI = nlparci(model_val,resid,'jacobian',jacobian); 
     % show me what's up
     figure(2)
     subplot(1,2,j)
-    visuals_complex_model('FB','SE',rheo_freq,rheo_stor,rheo_loss,model_val,s_time(j));
+    visuals_complex_model('PT','SE',rheo_freq,rheo_stor,rheo_loss,model_val,s_time(j));
     title(strcat(s_method,' - ',s_line,' - day ',num2str(s_time(j))))
 end
 CI(:,2)-model_val'
