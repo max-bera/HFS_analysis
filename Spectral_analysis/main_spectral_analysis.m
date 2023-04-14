@@ -1,5 +1,10 @@
-path = '/Users/massimilianoberardi/Desktop/Spheroids_results/CONTROL_3_14/HCV_DAY3/20220324_145955_S2_01.tdms';
+% macos paths
+path = '/Users/massimilianoberardi/Desktop/Spheroids_results/CONTROL_3_14/HCV_DAY3/20220324_142758_S1_01.tdms';
 path_bg = '/Users/massimilianoberardi/Desktop/Spheroids_results/20220323_112003_background_01.tdms';
+% win paths
+path = 'C:\Users\massimiliano.berardi\Desktop\test_data\HCV29_3\20220324_150902_S3_01.tdms';
+path_bg = 'C:\Users\massimiliano.berardi\Desktop\test_data\20220323_112003_background_01.tdms';
+
 resampling_freq = 500; %Hz, max = acq_freq
 padding = 2; %n times the original array length
 pressure_sens = 76.50; %Pa/nm
@@ -48,7 +53,7 @@ displ_signal = displacement_field(:,idxs_sample_cavity(1):idxs_sample_cavity(2))
     displacement_field(1,idxs_sample_cavity(1):idxs_sample_cavity(2))/1.45;
 displ_signal = filter(b,a,displ_signal);
 
-K = (1/4)*ones(3);
+K = (1/9)*ones(3);
 displ_signal = conv2(displ_signal(1:1:end,:),K,'same');
 figure(10)
 subplot(1,2,1),
@@ -61,14 +66,18 @@ idx_decay = find(cavity_distance/1.45>pip_rad*4*1e6*1.45,1,'first')
 subplot(1,2,2)
 hold off
 j=1;
-for i = 0.1*resampling_freq:resampling_freq/10:20*resampling_freq
+lprp=0;
+ptoP=0;
+for i = 3*resampling_freq:resampling_freq/10:6*resampling_freq
     plot(cavity_distance(1:idx_decay)/1.45,displ_signal(i,1:idx_decay),'k.-')
-    ptoP(j) = mean(displ_signal(i,20:25))/max(displ_signal(i,1:idx_decay));
+    lprp(j) = mean(displ_signal(i,2:4))*1e-9/pip_rad/1.45*1.33;
+    ptoP(j) = mean(displ_signal(i,idx_decay-5:idx_decay))/(mean(displ_signal(i,2:4))/1.45*1.33);
     j = j+1;
     xlabel('distance [\mum]')
     ylabel('displacement [nm]')
     hold on
     grid on
 end
-%
-% zlim([0 10000])
+%%
+figure
+plot(lprp,ptoP)
