@@ -6,6 +6,7 @@ function [idx_pressure_sensor, idxs_sample] = find_sensors(cavity_data)
 cavity_data = log10(abs(cavity_data));
 % average out intensity
 cavity_data = mean(cavity_data);
+padding_est = round(length(cavity_data)/256);
 
 % find maximum to normalize
 [max_intensity, idx_max_intensity] = max(cavity_data);
@@ -22,11 +23,13 @@ cavity_data_tresholded(idx_tresholding) = 0;
 cavity_data_tresholded(1:5) = 0;
 
 % pressure sensor is the local maximum
-idx_pressure_sensor = find(islocalmax(cavity_data_tresholded),1);
+idx_pressure_sensor = find(islocalmax(cavity_data_tresholded(8*padding_est:11*padding_est)),1);
+idx_pressure_sensor = idx_pressure_sensor + 8*padding_est;
 
 %indices of the samples are nonzero events from left and right
-idxs_sample(1) = idx_pressure_sensor*2 + ...
-    find(cavity_data_tresholded(idx_pressure_sensor*2:end),1,'first');
+narrowed_search_idx = idx_pressure_sensor*4;
+idxs_sample(1) = narrowed_search_idx + ...
+    find(cavity_data_tresholded(narrowed_search_idx:end),1,'first');
 idxs_sample(2) = find(cavity_data_tresholded,1,'last');
 
 % temporary, just to make sure it didn't mess up

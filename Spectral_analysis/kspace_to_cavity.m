@@ -10,7 +10,7 @@ n_lambda = 512;
 cavity_data = fft(kspace_data,n_lambda*padding)';
 
 %just the first half
-cavity_data = cavity_data(:,1:256*padding);
+cavity_data = cavity_data(:,1:n_lambda/2*padding);
 
 %from k-space to distance in [um]
 space_freq = 1/(k_even_spacing(2)-k_even_spacing(1));

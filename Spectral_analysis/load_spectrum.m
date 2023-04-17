@@ -14,13 +14,13 @@ if nargin<3, BG = 'data'; end
         resampling_freq = acq_freq;
     end
     
-    % calculate time interval [ms]
-    time_ms = length(dsens_struct.Raw_data.Time.data);
+    % calculate time interval [# frames]
+    time_frames = length(dsens_struct.Raw_data.Time.data);
 
     % define length of experiment
     N = length(dsens_struct.Raw_data.LambdaArray.data);
     mean_lambda = mean(dsens_struct.Raw_data.LambdaArray.data);
-    acq_interval = round(acq_freq/resampling_freq);
+    downsampling_ratio = round(acq_freq/resampling_freq);
 
     % if background import, return only a time-avg vector of
     % intensity(lambda)
@@ -33,10 +33,10 @@ if nargin<3, BG = 'data'; end
     else
         % rewrite raw data in matrix form 
         raw_time_domain = reshape(dsens_struct.Raw_data.Data.data,...
-                [N time_ms]);
+                [N time_frames]);
     
         % downsample as per user input
-        downsampling_idx = 1:acq_interval:time_ms;
+        downsampling_idx = 1:downsampling_ratio:time_frames;
         spectrum= double(raw_time_domain(:,downsampling_idx));
         k_space = 2*pi./dsens_struct.Raw_data.LambdaArray.data;
     end
