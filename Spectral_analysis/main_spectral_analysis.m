@@ -5,8 +5,8 @@ path_bg = '/Users/massimilianoberardi/Desktop/Spheroids_results/20220323_112003_
 %path = 'C:\Users\massimiliano.berardi\Desktop\test_data\HCV29_3\20220324_150902_S3_01.tdms';
 %path_bg = 'C:\Users\massimiliano.berardi\Desktop\test_data\20220323_112003_background_01.tdms';
 
-resampling_freq = 100; %Hz, max = acq_freq
-padding = 2; %n times the original array length
+resampling_freq = 200; %Hz, max = acq_freq
+padding = 3; %n times the original array length
 pip_rad = 25e-6;
 
 %% load spectrum, transform
@@ -81,6 +81,8 @@ if idx_max_displacement == 1
     exp.zdisp = displ_signal(idx_profile,1:idx_decay)';
 else
     exp.zdisp = displ_signal(idx_profile,idx_max_displacement-1:idx_decay+idx_max_displacement-2)';
+    % the first point has different RI calc
+    exp.zdisp(1) = displ_signal(idx_profile,idx_max_displacement-1)'*1.45/1.33;
 end
 exp.zpos = cavity_distance(1:idx_decay)'/1.45;
 

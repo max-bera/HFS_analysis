@@ -11,7 +11,7 @@ phase = zeros(size(cavity_data));
 det_treshold = 2000;
 pressure_sens = 76.50; %Pa/nm
 RI_sample = 1.4;
-K_convolution_size = 2;
+K_convolution_size = 4;
 
 for i = 1:length(cavity_data)
     z = cavity_data(i,:);

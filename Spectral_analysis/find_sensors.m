@@ -24,7 +24,7 @@ cavity_data_tresholded(1:5) = 0;
 
 % pressure sensor is the local maximum
 idx_pressure_sensor = find(islocalmax(cavity_data_tresholded(8*padding_est:11*padding_est)),1);
-idx_pressure_sensor = idx_pressure_sensor + 8*padding_est;
+idx_pressure_sensor = idx_pressure_sensor + 8*padding_est -1;
 
 %indices of the samples are nonzero events from left and right
 narrowed_search_idx = idx_pressure_sensor*4;
@@ -38,7 +38,7 @@ plot(cavity_data_norm)
 hold on
 plot(idxs_sample(1),cavity_data_tresholded(idxs_sample(1)),'ro')
 plot(idxs_sample(2),cavity_data_tresholded(idxs_sample(2)),'ro')
-plot(idx_pressure_sensor,cavity_data_tresholded(idx_pressure_sensor),'ro')
+plot(idx_pressure_sensor,cavity_data_tresholded(idx_pressure_sensor),'r*')
 
 end
 
