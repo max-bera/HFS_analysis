@@ -5,14 +5,22 @@ path_bg = '/Users/massimilianoberardi/Desktop/Spheroids_results/20220323_112003_
 %path = 'C:\Users\massimiliano.berardi\Desktop\test_data\HCV29_3\20220324_150902_S3_01.tdms';
 %path_bg = 'C:\Users\massimiliano.berardi\Desktop\test_data\20220323_112003_background_01.tdms';
 
+%folder names for SAVING TOMOGRAPHY DATA
+line = 'T24';
+testday = '14';
+
 resampling_freq = 200; %Hz, max = acq_freq
 padding = 3; %n times the original array length
 pip_rad = 25e-6;
 
+data_path = '/Users/massimilianoberardi/Desktop/Spheroids_results/CONTROL_3_14/T24_DAY14/';
+file_list = dir(strcat(data_path,'*.tdms'));
+
+for k=1:length(file_list)
 %% load spectrum, transform
-
+path = strcat(data_path,'/',file_list(k).name)
 [spectrum_lambda, mean_lambda, k_space] = load_spectrum(path,resampling_freq);
-
+    try
 % k-space transform
 [spectrum_k, k_even_spacing] = k_resample_M(spectrum_lambda,k_space);
 % k-space to cavity
@@ -34,7 +42,7 @@ spectrum_noBG_lambda = spectrum_lambda-load_spectrum(path,resampling_freq,'BG');
 time_array = linspace(0,length(displ_signal)/resampling_freq,length(displ_signal));
 
 %add a lowpass
-freq = 20; %cutoff
+freq = 10; %cutoff
 Order = 5;
 [b, a] = butter(Order, freq / (resampling_freq * 2), 'low');
 
@@ -71,21 +79,24 @@ end
 
 %% prepare structure for analysis in ALVA
 j=1;
+save_path = strcat('/Users/massimilianoberardi/Desktop/Displ_profile','/',line,'/',testday,'/S_',num2str(k),'/');
+mkdir(save_path);
 for i=20:20:300
-exp.diameter = (idxs_sample_cavity(2)-idxs_sample_cavity(1))*cavity_distance(2)/1.45;
-exp.load = i; %Pa
-idx_profile = find(pressure_signal<-exp.load,1,'first');
-% at times segmentation is too generous, double check based on max displ
-[~,idx_max_displacement] = max(displ_signal(idx_profile,:));
-if idx_max_displacement == 1
-    exp.zdisp = displ_signal(idx_profile,1:idx_decay)';
-else
-    exp.zdisp = displ_signal(idx_profile,idx_max_displacement-1:idx_decay+idx_max_displacement-2)';
-    % the first point has different RI calc
-    exp.zdisp(1) = displ_signal(idx_profile,idx_max_displacement-1)'*1.45/1.33;
+        exp.diameter = (idxs_sample_cavity(2)-idxs_sample_cavity(1))*cavity_distance(2)/1.45;
+        exp.load = i; %Pa
+        idx_profile = find(pressure_signal<-exp.load,1,'first');
+        % at times segmentation is too generous, double check based on max displ
+        [~,idx_max_displacement] = max(displ_signal(idx_profile,1:20));
+        if idx_max_displacement == 1
+            exp.zdisp = displ_signal(idx_profile,1:idx_decay)';
+        else
+            exp.zdisp = displ_signal(idx_profile,idx_max_displacement-1:idx_decay+idx_max_displacement-2)';
+            % the first point has different RI calc
+            exp.zdisp(1) = displ_signal(idx_profile,idx_max_displacement-1)'*1.45/1.33;
+        end
+        exp.zpos = cavity_distance(1:idx_decay)'/1.45;
+        save(strcat(save_path,'/P_',num2str(j)), '-struct', 'exp');
+        j = j+1;
+    end
 end
-exp.zpos = cavity_distance(1:idx_decay)'/1.45;
-
-save(strcat('HCV_3_',num2str(j)), '-struct', 'exp');
-j = j+1;
 end

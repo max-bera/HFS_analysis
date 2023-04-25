@@ -33,12 +33,12 @@ idxs_sample(1) = narrowed_search_idx + ...
 idxs_sample(2) = find(cavity_data_tresholded,1,'last');
 
 % temporary, just to make sure it didn't mess up
-figure
-plot(cavity_data_norm)
-hold on
-plot(idxs_sample(1),cavity_data_tresholded(idxs_sample(1)),'ro')
-plot(idxs_sample(2),cavity_data_tresholded(idxs_sample(2)),'ro')
-plot(idx_pressure_sensor,cavity_data_tresholded(idx_pressure_sensor),'r*')
+% figure
+% plot(cavity_data_norm)
+% hold on
+% plot(idxs_sample(1),cavity_data_tresholded(idxs_sample(1)),'ro')
+% plot(idxs_sample(2),cavity_data_tresholded(idxs_sample(2)),'ro')
+% plot(idx_pressure_sensor,cavity_data_tresholded(idx_pressure_sensor),'r*')
 
 end
 
