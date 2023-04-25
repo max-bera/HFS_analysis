@@ -46,7 +46,7 @@ profile_folders = dir(profile_path);
 Eres = zeros((length(profile_folders)-3)*2,3);
 E_idx = 1;
 
-for k = 8:8%4:length(profile_folders)
+for k = 4:length(profile_folders)
     
     alva.path     = strcat(profile_path,'/',profile_folders(k).name);
     alva.filename = 'P';
@@ -124,7 +124,7 @@ for k = 8:8%4:length(profile_folders)
     alva.zi = cumsum(tz);                % Depth of first n-1 layers from the surface [mm]
     nz      = length(alva.zi)+1;         % number of layers
 
-    alva.E  = [1 10]*1e-3;%ones(1,nz)*1e-3;           % Layer Young's moduli [MPa]   
+    alva.E  = ones(1,nz)*1e-3;           % Layer Young's moduli [MPa]   
     alva.nu = ones(1,nz)*0.5;           % Layer Poisson's ratio [-]
     alva.kh = ones(1,nz-1)*1e9;          % Interface bonding/horizontal spring [MPa/mm]
     alva.nz = nz;
@@ -137,7 +137,7 @@ for k = 8:8%4:length(profile_folders)
             
     % Constraints
     E_LB    = E0.*0.1;          
-    E_UB    = E0.*10; 
+    E_UB    = E0.*20; 
     rbd_LB  = rbd0*0.97;
     rbd_UB  = rbd0*1.03;
     tz_LB   = ones(1,nz-1)*10e-3;      % min. thickness of one cell ~ 6 micron
@@ -172,17 +172,19 @@ for k = 8:8%4:length(profile_folders)
         E1(i)    = alva.E(1)*1e6;
         E2(i)    = alva.E(2)*1e6;
         RBD(i)   = alva.rbd_inf*1e3;
+        R2fit = 1-sum(((alva.dz_exp{1}+UZ(:,1))).^2)/sum(((alva.dz_exp{1}+mean(UZ(:,1)))).^2)
 
         Eres(E_idx,1:2) = alva.E;
-        Eres(E_idx,3) = fval;
+        Eres(E_idx,3) = R2fit;
         E_idx = E_idx + 1
         catch
-        Eres(E_idx,:) = NaN;
+        Eres(E_idx,1:2) = alva.E;
+        Eres(E_idx,3) = R2fit;
         E_idx = E_idx + 1
         end
     end
     %%
-    figure(1), title('Displacement profile');
+    figure(2), title('Displacement profile');
 hold on, grid on
 plot(alva.dz_exp{1}*1e3,alva.fopos{1}*1e3,'ko','LineWidth',1.25,'MarkerSize',5)
 hold on
@@ -191,3 +193,5 @@ plot(-UZ(:,1)*1e3,Z(:,1)*1e3,'-.k','LineWidth',1.0,'MarkerSize',6)
 end
 
 
+%%
+Eres_good = Eres(Eres(:,3)>0.75,1:2)
